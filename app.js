@@ -22,6 +22,8 @@
 /******************************Import dos arquivos de Controller do projeto *********************************/
 
 const controllerFilmes = require('./controller/controller_filme.js')
+const controllerGeneros = require('./controller/controller_genero.js')
+const controllerClassificacao = require('./controller/controller_classificacao.js')
 
 /********************************************************************************************************** */
 
@@ -139,19 +141,129 @@ app.delete('/v2/acmefilmes/filme/:id', cors(), async function (request, response
 
 })
 
-app.put('/v2/acmefilmes/updateFilme/:id', cors(), bodyParserJSON, async function (request, response, next) {
-    
+app.put('/v2/acmefilmes/filme/:id', cors(), bodyParserJSON, async function(request, response){
     let contentType = request.headers['content-type']
-    let idFilme = request.params.id
     let dadosBody = request.body
+    let idFilme = request.params.id
 
-    let resultUpdateFilme = await controllerFilmes.setAtualizarFilme(idFilme, dadosBody, contentType)
+    let dadosFilme = await controllerFilmes.setAtualizarFilme(idFilme, dadosBody, contentType)
 
-    response.status(resultUpdateFilme.status_code)
-    response.json(resultUpdateFilme)
+    response.status(dadosFilme.status_code)
+    response.json(dadosFilme)
 })
 
-//Executa a API e faz ela ficar aguardando requisições
+/************************************************************ GENERO **********************************************************************/
+
+app.get('/v2/acmefilmes/genero/:id', cors(), async function(request, response) {
+
+    let idGenero = request.params.id
+
+    let dadosGenero = await controllerGeneros.getBuscarGenero(idGenero)
+
+    response.status(dadosGenero.status_code)
+    response.json(dadosGenero)
+})
+
+app.get('/v2/acmefilmes/genero', cors(), async function(request, response) {
+
+    let nome = request.query.nome
+
+    let dadosGenero = await controllerGeneros.getListarGeneros(nome)
+
+    response.status(dadosGenero.status_code)
+    response.json(dadosGenero)
+})
+
+app.post('/v2/acmefilmes/genero', cors(), bodyParserJSON, async function (request, response){
+
+    let contentType = request.headers['content-type']
+
+    let dadosBody = request.body
+
+    let resultDadosNovoGenero = await controllerGeneros.setInserirNovoGenero(dadosBody, contentType)
+
+    response.status(resultDadosNovoGenero.status_code)
+    response.json(resultDadosNovoGenero)
+})
+
+app.delete('/v2/acmefilmes/genero/:id', cors(), async function (request, response, next) {
+
+    let idGenero = request.params.id
+
+    let dadosGenero = await controllerGeneros.setExcluirGenero(idGenero)
+
+    response.status(dadosGenero.status_code)
+    response.json(dadosGenero)
+
+})
+
+app.put('/v2/acmefilmes/genero/:id', cors(), bodyParserJSON, async function(request, response){
+    let contentType = request.headers['content-type']
+    let dadosBody = request.body
+    let idGenero = request.params.id
+
+    let dadosGenero = await controllerGeneros.setAtualizarGenero(idGenero, dadosBody, contentType)
+
+    response.status(dadosGenero.status_code)
+    response.json(dadosGenero)
+})
+
+/************************************************************ CLASSIFICAÇÃO **********************************************************************/
+
+app.get('/v2/acmefilmes/classificacao/:id', cors(), async function(request, response) {
+
+    let idClassificacao = request.params.id
+
+    let dadosClassificacao = await controllerClassificacao.getBuscarClassificacao(idClassificacao)
+
+    response.status(dadosClassificacao.status_code)
+    response.json(dadosClassificacao)
+})
+
+app.get('/v2/acmefilmes/classificacao', cors(), async function(request, response) {
+
+    let classificacao = request.query.nome
+
+    let dadosClassificacao = await controllerClassificacao.getListarClassificacoes(classificacao)
+
+    response.status(dadosClassificacao.status_code)
+    response.json(dadosClassificacao)
+})
+
+app.post('/v2/acmefilmes/classificacao', cors(), bodyParserJSON, async function (request, response){
+
+    let contentType = request.headers['content-type']
+
+    let dadosBody = request.body
+
+    let resultDadosNovaClassificacao = await controllerClassificacao.setInserirNovaClassificacao(dadosBody, contentType)
+
+    response.status(resultDadosNovaClassificacao.status_code)
+    response.json(resultDadosNovaClassificacao)
+})
+
+app.delete('/v2/acmefilmes/classificacao/:id', cors(), async function (request, response, next) {
+
+    let idClassificacao = request.params.id
+
+    let dadosClassificacao = await controllerClassificacao.setExcluirClassificacao(idClassificacao)
+
+    response.status(dadosClassificacao.status_code)
+    response.json(dadosClassificacao)
+
+})
+
+app.put('/v2/acmefilmes/classificacao/:id', cors(), bodyParserJSON, async function(request, response){
+    let contentType = request.headers['content-type']
+    let dadosBody = request.body
+    let idClassificacao = request.params.id
+
+    let dadosClassificacao = await controllerClassificacao.setAtualizarClassificacao(idClassificacao, dadosBody, contentType)
+
+    response.status(dadosClassificacao.status_code)
+    response.json(dadosClassificacao)
+})
+
 app.listen(8080, function(){
     console.log("api funcionando")
 })
