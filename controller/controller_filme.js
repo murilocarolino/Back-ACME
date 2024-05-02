@@ -9,6 +9,8 @@
 const message = require('../modulo/config.js')
 //Import do arquivo responsável pela interação como Banco de Dados (model)
 const filmesDAO = require('../model/DAO/filme.js')
+const classificacaoDAO = require('../model/DAO/classificacao.js')
+const generoDAO = require('../model/DAO/genero.js')
 
 //Função para validar e inserir um novo Filme
 const setInserirNovoFilme = async function (dadosFilme, contentType) {
@@ -27,6 +29,7 @@ const setInserirNovoFilme = async function (dadosFilme, contentType) {
                 dadosFilme.duracao == ''            || dadosFilme.duracao == undefined          || dadosFilme.duracao == null           || dadosFilme.duracao.length > 8            ||
                 dadosFilme.data_lancamento == ''    || dadosFilme.data_lancamento == undefined  || dadosFilme.data_lancamento == null   || dadosFilme.data_lancamento.length != 10  ||
                 dadosFilme.foto_capa == ''          || dadosFilme.foto_capa == undefined        || dadosFilme.foto_capa == null         || dadosFilme.foto_capa.length > 200        ||
+                dadosFilme.tbl_classificacao_id == ''         || dadosFilme.tbl_classificacao_id == undefined       || dadosFilme.tbl_classificacao_id == null || isNaN(dadosFilme.tbl_classificacao_id) ||
                 dadosFilme.valor_unitario.length > 6
             ) {
                 return message.ERROR_REQUIRED_FIELDS //400
@@ -56,6 +59,11 @@ const setInserirNovoFilme = async function (dadosFilme, contentType) {
 
                     //Encaminha os dados do FIlme para o DAO inserir no Banco de Dados
                     let novoFilme = await filmesDAO.insertFilme(dadosFilme)
+
+                    if(novoFilme){
+                        let idFilmes = await filmesDAO.IDFilme()
+                        dadosFilme.id = Number(idFilmes[0].id)
+                    }
 
                     //Validação para verificar se DAO inseriu os dados do Banco
                     if (novoFilme) {
@@ -102,6 +110,7 @@ const setAtualizarFilme = async function (idFilme, dadoAtualizado, contentType) 
                     dadoAtualizado.duracao == '' || dadoAtualizado.duracao == undefined || dadoAtualizado.duracao == null || dadoAtualizado.duracao.length > 8 ||
                     dadoAtualizado.data_lancamento == '' || dadoAtualizado.data_lancamento == undefined || dadoAtualizado.data_lancamento == null || dadoAtualizado.data_lancamento.length != 10 ||
                     dadoAtualizado.foto_capa == '' || dadoAtualizado.foto_capa == undefined || dadoAtualizado.foto_capa == null || dadoAtualizado.foto_capa.length > 200 ||
+                    dadoAtualizado.id_classificacao == ''         || dadoAtualizado.id_classificacao == undefined       || dadoAtualizado.id_classificacao == null || isNaN(dadoAtualizado.id_classificacao) ||
                     dadoAtualizado.valor_unitario.length > 6
                 ) {
                     return message.ERROR_REQUIRED_FIELDS
@@ -130,12 +139,6 @@ const setAtualizarFilme = async function (idFilme, dadoAtualizado, contentType) 
 
                         // Encaminha os dados do filme para o DAO inserir no DB
                         let dadosFilme = await filmesDAO.updateFilme(idFilme, dadoAtualizado)
-
-                        // if(atualizarFilme){
-                        //     let idFilmes = await filmesDAO.IDFilme()
-                        //     console.log(idFilmes)
-                        //     dadoAtualizado.id = Number(idFilmes[0].id)
-                        // }
 
                         // Validação para verificar se o DAO inseriu os dados do DB
                         if (dadosFilme) {
@@ -199,17 +202,28 @@ const getListarFilmes = async function () {
     let dadosFilmes = await filmesDAO.selectAllFilmes()
 
     //Validação para verificar se o DAO retornou dados
-    if (dadosFilmes) {
-        //Cria o JSON para retornar para o APP
+    if(dadosFilmes.length > 0){
+
+            
+        for(let filmes of dadosFilmes){
+            let classifyFilmes = await classificacaoDAO.selectByIdClassificacao(filmes.id_classificacao)
+            let filmeAtor = await filmesDAO.filmeAtor(filmes.id)
+            let generoFilme = await generoDAO.generoFilme(filmes.id)
+            delete filmes.id_classificacao
+            filmes.classificacao = classifyFilmes  
+            filmes.genero = generoFilme
+            filmes.ator = filmeAtor
+        }
+        
+        // Cria o JSON para retornar para o APP
         filmesJSON.filmes = dadosFilmes
         filmesJSON.quantidade = dadosFilmes.length
         filmesJSON.status_code = 200
 
         return filmesJSON
-    } else {
-        return false
+    }else{
+        return message.ERROR_NOT_FOUND // 404
     }
-
 }
 
 //Função para buscar um novo Filme

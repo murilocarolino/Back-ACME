@@ -30,7 +30,8 @@ const insertFilme = async function (dadosFilme) {
                                             data_lancamento,
                                             data_relancamento,
                                             foto_capa,
-                                            valor_unitario
+                                            valor_unitario,
+                                            tbl_classificacao_id
             ) values (
                                             '${dadosFilme.nome}',
                                             '${dadosFilme.sinopse}',
@@ -38,7 +39,8 @@ const insertFilme = async function (dadosFilme) {
                                             '${dadosFilme.data_lancamento}',
                                             '${dadosFilme.data_relancamento}',
                                             '${dadosFilme.foto_capa}',
-                                            '${dadosFilme.valor_unitario}'
+                                            '${dadosFilme.valor_unitario}',
+                                            '${dadosFilme.tbl_classificacao_id}'
             )`
 
         } else {
@@ -48,7 +50,8 @@ const insertFilme = async function (dadosFilme) {
                                             data_lancamento,
                                             data_relancamento,
                                             foto_capa,
-                                            valor_unitario
+                                            valor_unitario,
+                                            tbl_classificacao_id
             ) values (
                                             '${dadosFilme.nome}',
                                             '${dadosFilme.sinopse}',
@@ -56,7 +59,8 @@ const insertFilme = async function (dadosFilme) {
                                             '${dadosFilme.data_lancamento}',
                                             null,
                                             '${dadosFilme.foto_capa}',
-                                            '${dadosFilme.valor_unitario}'
+                                            '${dadosFilme.valor_unitario}',
+                                            '${dadosFilme.tbl_classificacao_id}'
             )`
         }
 
@@ -64,6 +68,8 @@ const insertFilme = async function (dadosFilme) {
         //(insert, update e delete)
         //$queryRawUnsafe() - serve para executar scripts com retorno de dados (select)
         let result = await prisma.$executeRawUnsafe(sql)
+        console.log(result)
+        console.log(sql);
 
         if (result)
             return true
@@ -90,6 +96,7 @@ const updateFilme = async function (id, dadoAtualizado) {
             data_relancamento = '${dadoAtualizado.data_relancamento}',
             foto_capa = '${dadoAtualizado.foto_capa}',
             valor_unitario = '${dadoAtualizado.valor_unitario}'
+            id_classificacao = '${dadosFilme.id_classificacao}'
             where
             id = ${id}`
         } else {
@@ -99,7 +106,8 @@ const updateFilme = async function (id, dadoAtualizado) {
             duracao = '${dadoAtualizado.duracao}',
             data_lancamento = '${dadoAtualizado.data_lancamento}',
             foto_capa = '${dadoAtualizado.foto_capa}',
-            valor_unitario = '${dadoAtualizado.valor_unitario}'
+            valor_unitario = '${dadoAtualizado.valor_unitario}',
+            id_classificacao = '${dadosFilme.id_classificacao}'
             where
             id = ${id}`
         }
@@ -183,11 +191,47 @@ const selectNomeFilme = async function (nome) {
 
 }
 
+const filmeAtor = async function (id) {
+
+    try {
+
+        let sql = `SELECT a.nome AS nome_ator
+        FROM tbl_filme_ator fa
+        JOIN tbl_ator a ON fa.tbl_ator_id = a.id
+        WHERE fa.tbl_filme_id = ${id}`
+
+        let rsDiretor = await prisma.$queryRawUnsafe(sql)
+
+        return rsDiretor
+
+
+    } catch (error) {
+
+        return false
+    }
+
+}
+
+const IDFilme = async function(){
+    try {
+        let sql = `select cast(last_insert_id() as DECIMAL) as id from tbl_filme limit 1`
+
+        let sqlID = await prisma.$queryRawUnsafe(sql)
+
+        return sqlID
+    } catch (error) {
+        return false
+    }
+    
+}
+
 module.exports = {
     insertFilme,
     updateFilme,
     deleteFilme,
     selectAllFilmes,
     selectByIdFilme,
-    selectNomeFilme
+    selectNomeFilme,
+    filmeAtor,
+    IDFilme
 }

@@ -108,11 +108,28 @@ const selectNomeGenero = async function (nome) {
 
 }
 
+const generoFilme = async function(id){
+    try {
+        let sql = `SELECT tbl_genero.nome
+        FROM tbl_filme_genero
+        JOIN tbl_genero ON tbl_filme_genero.tbl_genero_id = tbl_genero.id
+        WHERE tbl_filme_genero.tbl_filme_id = ${id}`
+
+        console.log(sql)
+        let sqlID = await prisma.$queryRawUnsafe(sql)
+
+        return sqlID
+    } catch (error) {
+        return false
+    }
+}
+
 module.exports = {
     insertGenero,
     updateGenero,
     deleteGenero,
     selectAllGeneros,
     selectByIdGenero,
-    selectNomeGenero
+    selectNomeGenero,
+    generoFilme
 }
