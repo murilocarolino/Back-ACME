@@ -34,7 +34,7 @@ const updateGenero = async function (id, dadoAtualizado) {
     let sql
 
     sql = `update tbl_genero set 
-        nome = "${dadoAtualizado.nome}",
+        nome = "${dadoAtualizado.nome}"
         where
         id = ${id}`
 
